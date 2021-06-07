@@ -24,10 +24,10 @@ class MainViewModel : ViewModel() {
     }
 
     init {
-        findResturant()
+        findRestaurant()
     }
 
-    fun findResturant() {
+    private fun findRestaurant() {
         _isLoading.value = true
         val client = ApiConfig.getApiService().getRestaurant(RESTAURANT_ID)
         client.enqueue(object : Callback<RestaurantResponse> {
@@ -48,6 +48,30 @@ class MainViewModel : ViewModel() {
                 _isLoading.value = false
                 Log.e(TAG, "onFailure: ${t.message.toString()}")
             }
+        })
+    }
+
+    fun postReview(review: String) {
+        _isLoading.value = true
+        val client = ApiConfig.getApiService().postReview(RESTAURANT_ID, "Mr. Hafiz", review)
+        client.enqueue(object : Callback<PostReviewResponse> {
+            override fun onResponse(
+                call: Call<PostReviewResponse>,
+                response: Response<PostReviewResponse>
+            ) {
+                _isLoading.value = false
+                if (response.isSuccessful) {
+                    _listReview.value = response.body()?.customerReviews
+                } else {
+                    Log.e(TAG, "onFailure: ${response.message()}")
+                }
+            }
+
+            override fun onFailure(call: Call<PostReviewResponse>, t: Throwable) {
+                _isLoading.value = false
+                Log.e(TAG, "onFailure: ${t.message.toString()}")
+            }
+
         })
     }
 }
